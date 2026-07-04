@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycleScope
 import kotlinx.coroutines.*
 
 class STLViewerFragment : Fragment() {
@@ -63,13 +63,12 @@ class STLViewerFragment : Fragment() {
             cursor.getString(0)
         } ?: "ملف"
 
-        // تحديد نوع الملف
         val isSTL = fileName.endsWith(".stl", ignoreCase = true)
         val isDXF = fileName.endsWith(".dxf", ignoreCase = true)
 
         when {
             isSTL -> loadSTLFile(uri)
-            isDXF -> loadDXFFile(uri)
+            isDXF -> loadDXFFile(uri) // هنعرضه بنفس الـ 3D Viewer
             else -> Toast.makeText(context, "نوع ملف غير مدعوم", Toast.LENGTH_SHORT).show()
         }
     }
@@ -80,14 +79,9 @@ class STLViewerFragment : Fragment() {
                 val model = withContext(Dispatchers.IO) {
                     STLParser.parse(requireContext(), uri)
                 }
-                currentModel = model
-                glViewerView.queueEvent {
-                    glViewerView.stlRenderer.setModel(model)
-                }
-                emptyStateText.visibility = View.GONE
-                Toast.makeText(context, "✅  ${model.triangleCount} مثلث", Toast.LENGTH_SHORT).show()
+                setModelToViewer(model)
             } catch (e: Exception) {
-                Toast.makeText(context, "خطأ: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "خطأ STL: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -95,21 +89,24 @@ class STLViewerFragment : Fragment() {
     private fun loadDXFFile(uri: Uri) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val dxfData = withContext(Dispatchers.IO) {
-                    DXFParser.parseDXF(requireContext(), uri)
+                val model = withContext(Dispatchers.IO) {
+                    DXFParser.parse(requireContext(), uri) // 1. غيرت parseDXF -> parse
                 }
-                // التبديل إلى DXFViewerFragment
-                val dxfFragment = DXFViewerFragment()
-                dxfFragment.loadDXFFile(dxfData)
-                parentFragmentManager.beginTransaction().apply {
-                    replace(R.id.fragmentContainer, dxfFragment)
-                    addToBackStack(null)
-                    commit()
-                }
-                Toast.makeText(context, "✅  تم تحميل ملف DXF", Toast.LENGTH_SHORT).show()
+                setModelToViewer(model) // 2. بنعرضه بنفس renderer
+                Toast.makeText(context, "✅  DXF: ${model.triangleCount} مثلث", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
-                Toast.makeText(context, "خطأ: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "خطأ DXF: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
+    }
+    
+    // فانكشن موحدة عشان منكررش الكود
+    private fun setModelToViewer(model: STLModel) {
+        currentModel = model
+        glViewerView.queueEvent {
+            glViewerView.stlRenderer.setModel(model)
+        }
+        emptyStateText.visibility = View.GONE
+        welcomeText.visibility = View.GONE
     }
 }
