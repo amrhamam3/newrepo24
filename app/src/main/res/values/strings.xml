@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amr3D Preview Pro</string>
+    <string name="open_file">📂 فتح</string>
+    <string name="no_file_loaded">لا يوجد ملف محمّل\nاضغط 📂 لفتح ملف STL أو DXF</string>
+    <string name="measure_tool">📐 قياس</string>
+    <string name="inspect_tool">🔍 فحص</string>
+    <string name="reset_view">↺ تصفير</string>
+    <string name="wireframe">🕸️ شبكي</string>
+    <string name="material">🎨 مادة</string>
+    <string name="export_image">📷 تصدير</string>
+    <string name="light">💡 ضوء</string>
+    <string name="directions">🧭</string>
+    <string name="unit_mm">📏 مم</string>
+    <string name="nav_viewer">العارض</string>
+    <string name="nav_history">التاريخ</string>
+    <string name="nav_slicer">Slicer</string>
+    <string name="nav_files">الملفات</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="settings_title">⚙️  الإعدادات</string>
+    <string name="settings_user">👤  المستخدم</string>
+    <string name="settings_change_name">✏️  تغيير الاسم</string>
+    <string name="settings_theme_color">🎨  لون التطبيق</string>
+    <string name="settings_unit">📏  وحدة القياس</string>
+    <string name="settings_quality">🎮  جودة العرض</string>
+    <string name="settings_quality_high">🔥  عالية</string>
+    <string name="settings_quality_medium">⚡  متوسطة</string>
+    <string name="settings_quality_low">💨  منخفضة</string>
+    <string name="settings_sound">🔊  صوت التنقل</string>
+    <string name="settings_anim">✨  انيميشن الانتقال</string>
+    <string name="settings_permissions">🔐  الأذونات</string>
+    <string name="settings_file_access">📁  إذن الوصول لكل الملفات</string>
+    <string name="settings_file_access_granted">✅  مفعّل — إذن كل الملفات</string>
+    <string name="settings_actions">🛠️  إجراءات</string>
+    <string name="settings_clear_history">🗑️  مسح سجل الملفات</string>
+    <string name="settings_contact_wa">💬  تواصل عبر واتساب</string>
+    <string name="settings_language">🌐  اللغة</string>
+    <string name="history_empty">🕐\n\nلا يوجد تاريخ بعد\nافتح ملف STL أو DXF للبدء</string>
+    <string name="history_title">🕐  آخر الملفات المفتوحة</string>
+    <string name="file_not_found">⚠️ الملف غير موجود</string>
+    <string name="loading_file">جارٍ تحميل الملف...</string>
+    <string name="loading_analyzing">جارٍ تحليل الملف...</string>
+    <string name="loading_preparing">جارٍ التحضير للعرض...</string>
+    <string name="loading_done">اكتمل ✓</string>
+    <string name="dxf_mode">📐 وضع DXF ثنائي الأبعاد</string>
+    <string name="stl_mode">🧊 وضع STL ثلاثي الأبعاد</string>
+</resources>

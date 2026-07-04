@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amr3D Preview Pro</string>
+    <string name="open_file">📂 Abrir</string>
+    <string name="no_file_loaded">Sin archivo cargado\nToca 📂 para abrir STL o DXF</string>
+    <string name="measure_tool">📐 Medir</string>
+    <string name="inspect_tool">🔍 Inspeccionar</string>
+    <string name="reset_view">↺ Restablecer</string>
+    <string name="wireframe">🕸️ Malla</string>
+    <string name="material">🎨 Material</string>
+    <string name="export_image">📷 Exportar</string>
+    <string name="light">💡 Luz</string>
+    <string name="directions">🧭</string>
+    <string name="unit_mm">📏 mm</string>
+    <string name="nav_viewer">Visor</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_slicer">Slicer</string>
+    <string name="nav_files">Archivos</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="settings_title">⚙️  Ajustes</string>
+    <string name="settings_user">👤  Usuario</string>
+    <string name="settings_change_name">✏️  Cambiar nombre</string>
+    <string name="settings_theme_color">🎨  Color de la app</string>
+    <string name="settings_unit">📏  Unidad de medida</string>
+    <string name="settings_quality">🎮  Calidad de render</string>
+    <string name="settings_quality_high">🔥  Alta</string>
+    <string name="settings_quality_medium">⚡  Media</string>
+    <string name="settings_quality_low">💨  Baja</string>
+    <string name="settings_sound">🔊  Sonido de navegación</string>
+    <string name="settings_anim">✨  Animación de transición</string>
+    <string name="settings_permissions">🔐  Permisos</string>
+    <string name="settings_file_access">📁  Acceso a todos los archivos</string>
+    <string name="settings_file_access_granted">✅  Concedido</string>
+    <string name="settings_actions">🛠️  Acciones</string>
+    <string name="settings_clear_history">🗑️  Borrar historial</string>
+    <string name="settings_contact_wa">💬  Contacto WhatsApp</string>
+    <string name="settings_language">🌐  Idioma</string>
+    <string name="history_empty">🕐\n\nSin historial\nAbre un archivo STL o DXF</string>
+    <string name="history_title">🕐  Abiertos recientemente</string>
+    <string name="file_not_found">⚠️ Archivo no encontrado</string>
+    <string name="loading_file">Abriendo…</string>
+    <string name="loading_analyzing">Analizando…</string>
+    <string name="loading_preparing">Preparando…</string>
+    <string name="loading_done">Listo ✓</string>
+    <string name="dxf_mode">📐 Modo DXF 2D</string>
+    <string name="stl_mode">🧊 Modo STL 3D</string>
+</resources>

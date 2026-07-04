@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amr3D Preview Pro</string>
+    <string name="open_file">📂 Ouvrir</string>
+    <string name="no_file_loaded">Aucun fichier chargé\nAppuyez 📂 pour ouvrir STL ou DXF</string>
+    <string name="measure_tool">📐 Mesurer</string>
+    <string name="inspect_tool">🔍 Inspecter</string>
+    <string name="reset_view">↺ Réinitialiser</string>
+    <string name="wireframe">🕸️ Filaire</string>
+    <string name="material">🎨 Matériau</string>
+    <string name="export_image">📷 Exporter</string>
+    <string name="light">💡 Lumière</string>
+    <string name="directions">🧭</string>
+    <string name="unit_mm">📏 mm</string>
+    <string name="nav_viewer">Visionneur</string>
+    <string name="nav_history">Historique</string>
+    <string name="nav_slicer">Slicer</string>
+    <string name="nav_files">Fichiers</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="settings_title">⚙️  Paramètres</string>
+    <string name="settings_user">👤  Utilisateur</string>
+    <string name="settings_change_name">✏️  Changer le nom</string>
+    <string name="settings_theme_color">🎨  Couleur de l\'app</string>
+    <string name="settings_unit">📏  Unité de mesure</string>
+    <string name="settings_quality">🎮  Qualité de rendu</string>
+    <string name="settings_quality_high">🔥  Haute</string>
+    <string name="settings_quality_medium">⚡  Moyenne</string>
+    <string name="settings_quality_low">💨  Basse</string>
+    <string name="settings_sound">🔊  Son de navigation</string>
+    <string name="settings_anim">✨  Animation de transition</string>
+    <string name="settings_permissions">🔐  Autorisations</string>
+    <string name="settings_file_access">📁  Accès à tous les fichiers</string>
+    <string name="settings_file_access_granted">✅  Accordé</string>
+    <string name="settings_actions">🛠️  Actions</string>
+    <string name="settings_clear_history">🗑️  Effacer l\'historique</string>
+    <string name="settings_contact_wa">💬  Contact WhatsApp</string>
+    <string name="settings_language">🌐  Langue</string>
+    <string name="history_empty">🕐\n\nAucun historique\nOuvrez un fichier STL ou DXF</string>
+    <string name="history_title">🕐  Récemment ouverts</string>
+    <string name="file_not_found">⚠️ Fichier introuvable</string>
+    <string name="loading_file">Ouverture…</string>
+    <string name="loading_analyzing">Analyse…</string>
+    <string name="loading_preparing">Préparation…</string>
+    <string name="loading_done">Terminé ✓</string>
+    <string name="dxf_mode">📐 Mode DXF 2D</string>
+    <string name="stl_mode">🧊 Mode STL 3D</string>
+</resources>
