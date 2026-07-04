@@ -1,5 +1,6 @@
 package com.amr3d.preview.pro
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
@@ -8,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 
-class ViewerFragment : Fragment() {
+class STLViewerFragment : Fragment() {
 
     private lateinit var glViewerView: GLViewerView
     private lateinit var emptyStateText: TextView
@@ -99,6 +100,7 @@ class ViewerFragment : Fragment() {
                 }
                 // التبديل إلى DXFViewerFragment
                 val dxfFragment = DXFViewerFragment()
+                dxfFragment.loadDXFFile(dxfData)
                 parentFragmentManager.beginTransaction().apply {
                     replace(R.id.fragmentContainer, dxfFragment)
                     addToBackStack(null)
