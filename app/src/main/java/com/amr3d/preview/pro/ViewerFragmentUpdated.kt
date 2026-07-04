@@ -6,8 +6,9 @@ import android.os.Bundle
 import android.view.*
 import android.widget.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycleScope
-import kotlinx.coroutines.*
+import androidx.lifecycleScope // 1. ده كان ناقص
+import kotlinx.coroutines.* // 2. وده كمان
+import android.provider.MediaStore
 
 class STLViewerFragment : Fragment() {
 
@@ -57,7 +58,7 @@ class STLViewerFragment : Fragment() {
         }
 
         val fileName = requireContext().contentResolver.query(
-            uri, arrayOf(android.provider.MediaStore.MediaColumns.DISPLAY_NAME), null, null, null
+            uri, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null, null
         )?.use { cursor ->
             cursor.moveToFirst()
             cursor.getString(0)
@@ -68,7 +69,7 @@ class STLViewerFragment : Fragment() {
 
         when {
             isSTL -> loadSTLFile(uri)
-            isDXF -> loadDXFFile(uri) // هنعرضه بنفس الـ 3D Viewer
+            isDXF -> loadDXFFile(uri)
             else -> Toast.makeText(context, "نوع ملف غير مدعوم", Toast.LENGTH_SHORT).show()
         }
     }
@@ -90,9 +91,9 @@ class STLViewerFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val model = withContext(Dispatchers.IO) {
-                    DXFParser.parse(requireContext(), uri) // 1. غيرت parseDXF -> parse
+                    DXFParser.parse(requireContext(), uri) // بنستخدم parse
                 }
-                setModelToViewer(model) // 2. بنعرضه بنفس renderer
+                setModelToViewer(model)
                 Toast.makeText(context, "✅  DXF: ${model.triangleCount} مثلث", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Toast.makeText(context, "خطأ DXF: ${e.message}", Toast.LENGTH_LONG).show()
@@ -100,7 +101,6 @@ class STLViewerFragment : Fragment() {
         }
     }
     
-    // فانكشن موحدة عشان منكررش الكود
     private fun setModelToViewer(model: STLModel) {
         currentModel = model
         glViewerView.queueEvent {
