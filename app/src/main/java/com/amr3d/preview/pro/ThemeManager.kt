@@ -17,7 +17,7 @@ import android.view.ViewGroup
 object ThemeManager {
     
     fun applyToActivity(activity: AppCompatActivity) {
-        val theme = AppTheme.getCurrent(activity)
+        val theme = AppTheme.getCurrent(activity) // دي بترجع ThemeColor
         
         // تطبيق على BottomNavigationView
         activity.findViewById<BottomNavigationView?>(R.id.bottomNav)?.let {
@@ -25,7 +25,7 @@ object ThemeManager {
                 intArrayOf(android.R.attr.state_checked),
                 intArrayOf(-android.R.attr.state_checked)
             )
-            val colors = intArrayOf(theme.accent, 0xFF888888.toInt())
+            val colors = intArrayOf(theme.accent, 0xFF888.toInt())
             val csl = ColorStateList(states, colors)
             it.itemIconTintList = csl
             it.itemTextColor = csl
@@ -36,7 +36,8 @@ object ThemeManager {
         applyThemeRecursive(rootView, activity, theme)
     }
     
-    private fun applyThemeRecursive(view: android.view.View?, activity: Activity, theme: AppTheme.Theme) {
+    // هنا كان الغلط: غيرت AppTheme.Theme -> AppTheme.ThemeColor
+    private fun applyThemeRecursive(view: android.view.View?, activity: Activity, theme: AppTheme.ThemeColor) {
         if (view == null) return
         
         when (view) {
@@ -45,7 +46,7 @@ object ThemeManager {
                     intArrayOf(android.R.attr.state_enabled),
                     intArrayOf(-android.R.attr.state_enabled)
                 )
-                val colors = intArrayOf(theme.accent, 0xFF666666.toInt())
+                val colors = intArrayOf(theme.accent, 0xFF666.toInt())
                 view.progressTintList = ColorStateList(states, colors)
             }
             is Button -> {
@@ -56,8 +57,14 @@ object ThemeManager {
                     intArrayOf(android.R.attr.state_checked),
                     intArrayOf(-android.R.attr.state_checked)
                 )
-                val colors = intArrayOf(theme.accent, 0xFF888888.toInt())
+                val colors = intArrayOf(theme.accent, 0xFF888.toInt())
                 view.setTextColor(ColorStateList(states, colors))
+            }
+            is ImageButton -> {
+                view.imageTintList = ColorStateList.valueOf(theme.accent)
+            }
+            is AppCompatImageButton -> {
+                view.imageTintList = ColorStateList.valueOf(theme.accent)
             }
         }
         
