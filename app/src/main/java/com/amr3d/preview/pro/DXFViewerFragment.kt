@@ -91,7 +91,9 @@ class DXFCanvasView(context: Context) : View(context) {
         style = Paint.Style.STROKE
     }
     
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.OnGestureListener {
+        override fun onDown(e: MotionEvent): Boolean = true
+        
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             panX -= distanceX / zoom
             panY -= distanceY / zoom
@@ -107,6 +109,10 @@ class DXFCanvasView(context: Context) : View(context) {
             }
             return true
         }
+        
+        override fun onShowPress(e: MotionEvent?) {}
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
+        override fun onLongPress(e: MotionEvent?) {}
     })
     
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.OnScaleGestureListener {
