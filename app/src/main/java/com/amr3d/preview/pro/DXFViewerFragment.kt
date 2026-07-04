@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import kotlin.math.min
 import kotlin.math.sqrt
 
 class DXFViewerFragment : Fragment() {
@@ -29,7 +30,7 @@ class DXFViewerFragment : Fragment() {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        setBackgroundColor(0xFF000000.toInt())
+        setBackgroundColor(0xFF000.toInt())
         
         dxfCanvas = DXFCanvasView(requireContext())
         addView(dxfCanvas)
@@ -77,7 +78,7 @@ class DXFCanvasView(context: Context) : View(context) {
     private var panY = 0f
     
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF333333.toInt()
+        color = 0xFF333.toInt()
         strokeWidth = 0.5f
     }
     
@@ -94,7 +95,7 @@ class DXFCanvasView(context: Context) : View(context) {
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean = true
         
-        override fun onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             panX -= distanceX / zoom
             panY -= distanceY / zoom
             invalidate()
@@ -108,8 +109,7 @@ class DXFCanvasView(context: Context) : View(context) {
             return true
         }
         
-        override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean = false
-        override fun onLongPress(e: MotionEvent) {}
+        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = false
     })
     
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.OnScaleGestureListener {
@@ -124,35 +124,45 @@ class DXFCanvasView(context: Context) : View(context) {
     })
     
     init {
-        setBackgroundColor(0xFF000000.toInt())
+        setBackgroundColor(0xFF000.toInt())
     }
     
     fun setDXFData(data: DXFData) {
         dxfData = data
-        fitToScreen()
+        // استنى لما الـ View ياخد المقاس وبعدين اعمل fit
+        post { fitToScreen() }
         invalidate()
     }
     
     private fun fitToScreen() {
-        if (dxfData == null || dxfData!!.lines.isEmpty()) return
+        val data = dxfData ?: return
+        if (width == 0 || height == 0) return
         
         var minX = Float.MAX_VALUE
-        var maxX = Float.MIN_VALUE
+        var maxX = -Float.MAX_VALUE
         var minY = Float.MAX_VALUE
-        var maxY = Float.MIN_VALUE
+        var maxY = -Float.MAX_VALUE
         
-        dxfData!!.lines.forEach { line ->
+        data.lines.forEach { line ->
             minX = minOf(minX, line.x1, line.x2)
             maxX = maxOf(maxX, line.x1, line.x2)
             minY = minOf(minY, line.y1, line.y2)
             maxY = maxOf(maxY, line.y1, line.y2)
+        }
+        data.circles.forEach { c ->
+            minX = minOf(minX, c.cx - c.r)
+            maxX = maxOf(maxX, c.cx + c.r)
+            minY = minOf(minY, c.cy - c.r)
+            maxY = maxOf(maxY, c.cy + c.r)
         }
         
         if (minX == Float.MAX_VALUE) return
         
         val width = maxX - minX
         val height = maxY - minY
-        val scale = minOf(this.width / (width * 1.1f), this.height / (height * 1.1f))
+        if (width == 0f || height == 0f) return
+        
+        val scale = min(this.width / (width * 1.1f), this.height / (height * 1.1f))
         zoom = scale.coerceIn(0.1f, 10f)
         panX = -(minX + width / 2) + this.width / (2 * zoom)
         panY = -(minY + height / 2) + this.height / (2 * zoom)
@@ -168,13 +178,9 @@ class DXFCanvasView(context: Context) : View(context) {
     
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        
-        // رسم الشبكة
         drawGrid(canvas)
         
-        // رسم الـ DXF data
         dxfData?.let { data ->
-            // رسم الخطوط
             data.lines.forEach { line ->
                 linePaint.color = line.color
                 val x1 = (line.x1 + panX) * zoom
@@ -184,7 +190,6 @@ class DXFCanvasView(context: Context) : View(context) {
                 canvas.drawLine(x1, y1, x2, y2, linePaint)
             }
             
-            // رسم الدوائر
             data.circles.forEach { circle ->
                 circlePaint.color = circle.color
                 val cx = (circle.cx + panX) * zoom
@@ -193,7 +198,6 @@ class DXFCanvasView(context: Context) : View(context) {
                 canvas.drawCircle(cx, cy, r, circlePaint)
             }
             
-            // رسم الأقواس
             data.arcs.forEach { arc ->
                 circlePaint.color = arc.color
                 val cx = (arc.cx + panX) * zoom
@@ -206,15 +210,16 @@ class DXFCanvasView(context: Context) : View(context) {
     }
     
     private fun drawGrid(canvas: Canvas) {
+        if (zoom < 0.01f) return
         val gridSpacing = 50 * zoom
         
-        var x = panX * zoom % gridSpacing
+        var x = (panX * zoom) % gridSpacing
         while (x < width) {
             canvas.drawLine(x, 0f, x, height.toFloat(), gridPaint)
             x += gridSpacing
         }
         
-        var y = panY * zoom % gridSpacing
+        var y = (panY * zoom) % gridSpacing
         while (y < height) {
             canvas.drawLine(0f, y, width.toFloat(), y, gridPaint)
             y += gridSpacing
