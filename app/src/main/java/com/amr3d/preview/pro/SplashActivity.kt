@@ -170,8 +170,8 @@ class SplashActivity : AppCompatActivity() {
             val root = window.decorView
             ObjectAnimator.ofFloat(root, "alpha", 1f, 0f).apply {
                 duration = 500; interpolator = AccelerateInterpolator()
-                addListener(object : android.animation.AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
                         startActivity(Intent(this@SplashActivity, MainActivity::class.java))
                         @Suppress("DEPRECATION")
                         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
@@ -203,8 +203,8 @@ class SplashActivity : AppCompatActivity() {
                 ObjectAnimator.ofFloat(ripple, "alpha", 0.6f, 0f)
             )
             duration = 600
-            addListener(object : android.animation.AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: android.animation.Animator) {
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
                     (window.decorView as? ViewGroup)?.removeView(ripple)
                 }
             })

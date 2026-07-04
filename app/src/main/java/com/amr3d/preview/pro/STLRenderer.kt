@@ -211,6 +211,21 @@ class STLRenderer : GLSurfaceView.Renderer {
     private var meshProgram = 0
     private var lineProgram = 0
 
+    // Cached uniform/attribute locations للـ mesh program
+    private var cachedMVPHandle = -1
+    private var cachedModelMatHandle = -1
+    private var cachedNormalMatHandle = -1
+    private var cachedPosHandle = -1
+    private var cachedNormHandle = -1
+    private var cachedColorHandle = -1
+    private var cachedLightDirHandle = -1
+    private var cachedMaterialHandle = -1
+
+    // Cached locations للـ line program
+    private var cachedLinePosHandle = -1
+    private var cachedLineMVPHandle = -1
+    private var cachedLineColorHandle = -1
+
     // CPU-side buffers (nulled after upload to GPU)
     private var vertexBuffer: FloatBuffer? = null
     private var normalBuffer: FloatBuffer? = null
@@ -312,6 +327,7 @@ class STLRenderer : GLSurfaceView.Renderer {
     private fun uploadModelToGPU(model: STLModel) {
         val verts = model.vertices
         val norms = model.normals
+        // الـ solid mesh يُرسم كاملاً دائماً — حساب الكاملة قبل أي تقليص
         vertexCountToDraw = verts.size / 3
 
         try {
@@ -401,10 +417,32 @@ class STLRenderer : GLSurfaceView.Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
         meshProgram = createProgram(vertexShaderCode, fragmentShaderCode)
         lineProgram = createProgram(lineVertexShaderCode, lineFragmentShaderCode)
+        
+        // Cache uniform/attribute locations مرة واحدة فقط
+        cacheProgramLocations()
+        
         // Generate VBO handles
         GLES20.glGenBuffers(3, vboIds, 0)
         // Upload any model that was loaded before GL context was ready
+        // أولاً: ارفع أي موديل معلّق — قبل أي return
         pendingModel?.let { uploadModelToGPU(it); pendingModel = null }
+    }
+
+    private fun cacheProgramLocations() {
+        // Mesh program locations
+        cachedMVPHandle = GLES20.glGetUniformLocation(meshProgram, "uMVPMatrix")
+        cachedModelMatHandle = GLES20.glGetUniformLocation(meshProgram, "uModelMatrix")
+        cachedNormalMatHandle = GLES20.glGetUniformLocation(meshProgram, "uNormalMatrix")
+        cachedPosHandle = GLES20.glGetAttribLocation(meshProgram, "vPosition")
+        cachedNormHandle = GLES20.glGetAttribLocation(meshProgram, "vNormal")
+        cachedColorHandle = GLES20.glGetUniformLocation(meshProgram, "uColor")
+        cachedLightDirHandle = GLES20.glGetUniformLocation(meshProgram, "uLightDir")
+        cachedMaterialHandle = GLES20.glGetUniformLocation(meshProgram, "uMaterial")
+
+        // Line program locations
+        cachedLinePosHandle = GLES20.glGetAttribLocation(lineProgram, "vPosition")
+        cachedLineMVPHandle = GLES20.glGetUniformLocation(lineProgram, "uMVPMatrix")
+        cachedLineColorHandle = GLES20.glGetUniformLocation(lineProgram, "uColor")
     }
 
     var bgColor = floatArrayOf(0.10f, 0.11f, 0.13f)
@@ -479,68 +517,58 @@ class STLRenderer : GLSurfaceView.Renderer {
     private fun drawWireframe() {
         if (wireframeVertexCount == 0) return
         GLES20.glUseProgram(lineProgram)
-        val positionHandle = GLES20.glGetAttribLocation(lineProgram, "vPosition")
-        val mvpHandle = GLES20.glGetUniformLocation(lineProgram, "uMVPMatrix")
-        val colorHandle = GLES20.glGetUniformLocation(lineProgram, "uColor")
-        GLES20.glEnableVertexAttribArray(positionHandle)
+        
+        GLES20.glEnableVertexAttribArray(cachedLinePosHandle)
         if (vboReady) {
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboIds[2])
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
+            GLES20.glVertexAttribPointer(cachedLinePosHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
         } else {
             val buf = wireframeBuffer ?: return
             buf.position(0)
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, buf)
+            GLES20.glVertexAttribPointer(cachedLinePosHandle, 3, GLES20.GL_FLOAT, false, 0, buf)
         }
-        GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvpMatrix, 0)
-        GLES20.glUniform4f(colorHandle, modelColor[0], modelColor[1], modelColor[2], 1f)
+        GLES20.glUniformMatrix4fv(cachedLineMVPHandle, 1, false, mvpMatrix, 0)
+        GLES20.glUniform4f(cachedLineColorHandle, modelColor[0], modelColor[1], modelColor[2], 1f)
         GLES20.glLineWidth(1.5f)
         GLES20.glDrawArrays(GLES20.GL_LINES, 0, wireframeVertexCount)
-        GLES20.glDisableVertexAttribArray(positionHandle)
+        GLES20.glDisableVertexAttribArray(cachedLinePosHandle)
         if (vboReady) GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
     }
 
     private fun drawSolidMesh() {
         GLES20.glUseProgram(meshProgram)
-        val positionHandle = GLES20.glGetAttribLocation(meshProgram, "vPosition")
-        val normalHandle   = GLES20.glGetAttribLocation(meshProgram, "vNormal")
-        val mvpHandle      = GLES20.glGetUniformLocation(meshProgram, "uMVPMatrix")
-        val modelMatHandle = GLES20.glGetUniformLocation(meshProgram, "uModelMatrix")
-        GLES20.glUniformMatrix4fv(modelMatHandle, 1, false, modelMatrix, 0)
-        val normalMatrixHandle = GLES20.glGetUniformLocation(meshProgram, "uNormalMatrix")
-        val colorHandle = GLES20.glGetUniformLocation(meshProgram, "uColor")
-        val lightDirHandle = GLES20.glGetUniformLocation(meshProgram, "uLightDir")
-        val materialHandle = GLES20.glGetUniformLocation(meshProgram, "uMaterial")
-
-        GLES20.glEnableVertexAttribArray(positionHandle)
-        GLES20.glEnableVertexAttribArray(normalHandle)
+        
+        GLES20.glEnableVertexAttribArray(cachedPosHandle)
+        GLES20.glEnableVertexAttribArray(cachedNormHandle)
         if (vboReady) {
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboIds[0])
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
+            GLES20.glVertexAttribPointer(cachedPosHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboIds[1])
-            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
+            GLES20.glVertexAttribPointer(cachedNormHandle, 3, GLES20.GL_FLOAT, false, 0, 0)
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
         } else {
             vertexBuffer?.position(0)
-            GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer ?: return)
+            GLES20.glVertexAttribPointer(cachedPosHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer ?: return)
             normalBuffer?.position(0)
-            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT, false, 0, normalBuffer ?: return)
+            GLES20.glVertexAttribPointer(cachedNormHandle, 3, GLES20.GL_FLOAT, false, 0, normalBuffer ?: return)
         }
 
-        GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvpMatrix, 0)
-        GLES20.glUniformMatrix4fv(normalMatrixHandle, 1, false, normalMatrix, 0)
-        GLES20.glUniform4fv(colorHandle, 1, modelColor, 0)
-        GLES20.glUniform1i(materialHandle, currentMaterial.id)
+        GLES20.glUniformMatrix4fv(cachedMVPHandle, 1, false, mvpMatrix, 0)
+        GLES20.glUniformMatrix4fv(cachedModelMatHandle, 1, false, modelMatrix, 0)
+        GLES20.glUniformMatrix4fv(cachedNormalMatHandle, 1, false, normalMatrix, 0)
+        GLES20.glUniform4fv(cachedColorHandle, 1, modelColor, 0)
+        GLES20.glUniform1i(cachedMaterialHandle, currentMaterial.id)
 
         // حساب اتجاه الإضاءة من الزاوية
         val angleRad = Math.toRadians(lightAngle.toDouble()).toFloat()
         val lx = kotlin.math.cos(angleRad) * 0.7f
         val ly = 0.7f
         val lz = kotlin.math.sin(angleRad) * 0.7f
-        GLES20.glUniform3f(lightDirHandle, lx, ly, lz)
+        GLES20.glUniform3f(cachedLightDirHandle, lx, ly, lz)
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCountToDraw)
-        GLES20.glDisableVertexAttribArray(positionHandle)
-        GLES20.glDisableVertexAttribArray(normalHandle)
+        GLES20.glDisableVertexAttribArray(cachedPosHandle)
+        GLES20.glDisableVertexAttribArray(cachedNormHandle)
         if (vboReady) GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
     }
 
@@ -548,12 +576,8 @@ class STLRenderer : GLSurfaceView.Renderer {
         GLES20.glUseProgram(lineProgram)
         GLES20.glDisable(GLES20.GL_DEPTH_TEST)
 
-        val positionHandle = GLES20.glGetAttribLocation(lineProgram, "vPosition")
-        val mvpHandle = GLES20.glGetUniformLocation(lineProgram, "uMVPMatrix")
-        val colorHandle = GLES20.glGetUniformLocation(lineProgram, "uColor")
-
-        GLES20.glUniformMatrix4fv(mvpHandle, 1, false, mvpMatrix, 0)
-        GLES20.glEnableVertexAttribArray(positionHandle)
+        GLES20.glUniformMatrix4fv(cachedLineMVPHandle, 1, false, mvpMatrix, 0)
+        GLES20.glEnableVertexAttribArray(cachedLinePosHandle)
 
         val flat = FloatArray(pts.size * 3)
         pts.forEachIndexed { i, p ->
@@ -562,17 +586,17 @@ class STLRenderer : GLSurfaceView.Renderer {
         val fb = ByteBuffer.allocateDirect(flat.size * 4).order(ByteOrder.nativeOrder())
             .asFloatBuffer().apply { put(flat); position(0) }
 
-        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, fb)
-        GLES20.glUniform4f(colorHandle, 1f, 0.75f, 0.1f, 1f)
+        GLES20.glVertexAttribPointer(cachedLinePosHandle, 3, GLES20.GL_FLOAT, false, 0, fb)
+        GLES20.glUniform4f(cachedLineColorHandle, 1f, 0.75f, 0.1f, 1f)
         GLES20.glDrawArrays(GLES20.GL_POINTS, 0, pts.size)
 
         if (pts.size == 2) {
-            GLES20.glUniform4f(colorHandle, 1f, 0.85f, 0.2f, 1f)
+            GLES20.glUniform4f(cachedLineColorHandle, 1f, 0.85f, 0.2f, 1f)
             GLES20.glLineWidth(4f)
             GLES20.glDrawArrays(GLES20.GL_LINES, 0, 2)
         }
 
-        GLES20.glDisableVertexAttribArray(positionHandle)
+        GLES20.glDisableVertexAttribArray(cachedLinePosHandle)
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)
     }
 

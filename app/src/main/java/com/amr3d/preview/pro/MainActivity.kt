@@ -1,14 +1,18 @@
 package com.amr3d.preview.pro
 
 import android.content.Context
+import android.content.res.Configuration
 import android.media.AudioAttributes
 import android.media.SoundPool
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import java.io.File
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // قراءة اللغة المحفوظة وتطبيقها قبل setContentView
+        applyLanguage()
+        
         setContentView(R.layout.activity_main)
 
         initSound()
@@ -63,6 +71,12 @@ class MainActivity : AppCompatActivity() {
                 viewerFragment.loadFile(fileUri)
             }, 400)
         }
+    }
+
+    private fun applyLanguage() {
+        val prefs = getSharedPreferences("amr3d_prefs", Context.MODE_PRIVATE)
+        val lang = prefs.getString("language", "ar") ?: "ar"
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(lang))
     }
 
     private fun applyThemeToNav() {

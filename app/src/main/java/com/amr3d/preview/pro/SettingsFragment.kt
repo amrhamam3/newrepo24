@@ -35,6 +35,27 @@ class SettingsFragment : Fragment() {
             }).apply()
         }
 
+        // ══ اللغة ══
+        val langGroup = view.findViewById<RadioGroup>(R.id.languageGroup)
+        when (prefs.getString("language", "ar")) {
+            "ar" -> langGroup.check(R.id.radioArabic)
+            "en" -> langGroup.check(R.id.radioEnglish)
+            "fr" -> langGroup.check(R.id.radioFrench)
+            "es" -> langGroup.check(R.id.radioSpanish)
+        }
+        langGroup.setOnCheckedChangeListener { _, id ->
+            val lang = when (id) {
+                R.id.radioArabic  -> "ar"
+                R.id.radioEnglish -> "en"
+                R.id.radioFrench  -> "fr"
+                R.id.radioSpanish -> "es"
+                else -> "ar"
+            }
+            prefs.edit().putString("language", lang).apply()
+            Toast.makeText(ctx, "✅ اللغة: $lang\nسيُطبَّق بعد إعادة تشغيل التطبيق", Toast.LENGTH_SHORT).show()
+            requireActivity().recreate()
+        }
+
         // ══ ألوان التطبيق ══
         setupThemeRow(view)
 
@@ -217,7 +238,8 @@ class SettingsFragment : Fragment() {
             circle.setOnClickListener {
                 AppTheme.setCurrent(ctx, theme)
                 setupThemeRow(view) // إعادة رسم لتحديث الحلقة
-                Toast.makeText(ctx, "✅ ${theme.nameAr}\nسيُطبَّق بالكامل عند إعادة فتح التطبيق", Toast.LENGTH_LONG).show()
+                Toast.makeText(ctx, "✅ ${theme.nameAr}\nسيُطبَّق فوراً", Toast.LENGTH_LONG).show()
+                requireActivity().recreate()
             }
             cell.addView(circle)
             row.addView(cell)
